@@ -68,6 +68,24 @@ type campaignImagesFormatter struct {
 	IsPrimary bool   `json:"is_primary"`
 }
 
+func FormatCampaign(campaign Campaign) CampaignFormatter {
+	campaignFormatter := CampaignFormatter{}
+	campaignFormatter.ID = campaign.ID
+	campaignFormatter.UserID = campaign.UserID
+	campaignFormatter.Name = campaign.Name
+	campaignFormatter.ShortDescription = campaign.ShortDescription
+	campaignFormatter.GoalAmount = campaign.GoalAmount
+	campaignFormatter.CurrentAmount = campaign.CurrentAmount
+	campaignFormatter.Slug = campaign.Slug
+	campaignFormatter.ImageURL = ""
+
+	if len(campaign.CampaignImages) > 0 {
+		campaignFormatter.ImageURL = campaign.CampaignImages[0].FileName
+	}
+
+	return campaignFormatter
+}
+
 func FormatCampaignDetail(campaign Campaign) CampaignDetailFormatter {
 	campaignFormat := CampaignDetailFormatter{}
 	campaignFormat.ID = campaign.ID

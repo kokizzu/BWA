@@ -86,7 +86,7 @@ func (h *campaignHandler) CreateCampaign(c *gin.Context) {
 
 	}
 
-	response := helper.APIResponse("campaign successfully created", http.StatusOK, "success", campaign.FormatCampaignDetail(newCampaign))
+	response := helper.APIResponse("campaign successfully created", http.StatusOK, "success", campaign.FormatCampaign(newCampaign))
 	c.JSON(http.StatusOK, response)
 	return
 
@@ -114,6 +114,10 @@ func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
 		return
 	}
 
+	currentUser := c.MustGet("currentUser").(user.User)
+
+	inputData.User = currentUser
+
 	updatedCampaign, err := h.service.Update(inputID, inputData)
 	if err != nil {
 		response := helper.APIResponse("error to update campaign", http.StatusBadRequest, "error", nil)
@@ -121,7 +125,7 @@ func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
 		return
 	}
 
-	response := helper.APIResponse("campaign successfully updated", http.StatusOK, "success", campaign.FormatCampaignDetail(updatedCampaign))
+	response := helper.APIResponse("campaign successfully updated", http.StatusOK, "success", campaign.FormatCampaign(updatedCampaign))
 	c.JSON(http.StatusOK, response)
 	return
 
