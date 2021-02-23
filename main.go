@@ -5,6 +5,7 @@ import (
 	"BWA/campaign"
 	"BWA/handler"
 	"BWA/helper"
+	"BWA/transactions"
 	"BWA/user"
 	"log"
 	"net/http"
@@ -18,7 +19,7 @@ import (
 
 func main() {
 
-	dsn := "root:@tcp(127.0.0.1:3306)/BWA?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:!@tcp(127.0.0.1:3306)/BWA?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
@@ -27,10 +28,12 @@ func main() {
 
 	userRepository := user.NewRepository(db)
 	campaignRepository := campaign.NewRepository(db)
+	TransactionRepo := transactions.NewRepository(db)
 
 	userService := user.NewService(userRepository)
 	authService := auth.NewService()
 	campaignService := campaign.NewService(campaignRepository)
+	_ = transactions.NewService(TransactionRepo)
 
 	userHandler := handler.NewUserHandler(userService, authService)
 	campaignHandler := handler.NewCampaignHandler(campaignService)
@@ -48,6 +51,7 @@ func main() {
 	api.GET("/campaigns/:id", campaignHandler.GetCampaign)
 	api.POST("/campaign", authMiddleWare(authService, userService), campaignHandler.CreateCampaign)
 	api.PUT("/campaign/:id", authMiddleWare(authService, userService), campaignHandler.UpdateCampaign)
+	api.POST("/campaign-images", authMiddleWare(authService, userService), campaignHandler.UploadImage)
 	router.Run()
 
 }
