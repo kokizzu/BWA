@@ -60,6 +60,7 @@ func (s *service) CreateCampaign(input CreateCampaignInput) (Campaign, error) {
 	campaign.UserID = input.User.ID
 
 	slugCandidate := fmt.Sprintf("%s %d", input.Name, input.User.ID)
+	fmt.Printf("%s", slugCandidate)
 	campaign.Slug = slug.Make(slugCandidate)
 
 	newCampaign, err := s.repository.Save(campaign)

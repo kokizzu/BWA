@@ -15,10 +15,10 @@ type Service interface {
 }
 
 type service struct {
-	repository Repository
+	repository RepoSQL
 }
 
-func NewService(repository Repository) *service {
+func NewService(repository RepoSQL) *service {
 	return &service{repository}
 }
 
@@ -34,8 +34,7 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 	if err != nil {
 		return user, err
 	}
-	// lanjutkeun, ada beberapa notes dari gw ya.. teliti dikit haha
-	// gue di kantor pernah di marahin karena ngoding nya pengen2 cepet2 kelar. akhirnya g teliti wkwk
+
 	user.PasswordHash = string(passwordHash)
 	user.Role = "user"
 

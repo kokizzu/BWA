@@ -1,6 +1,7 @@
 package transactions
 
 import (
+	"BWA/campaign"
 	"BWA/user"
 	"time"
 )
@@ -10,9 +11,10 @@ type Transactions struct {
 	CampaignID int
 	UserID     int
 	Amount     int
-	User       user.User
 	Status     string
 	Code       string
+	User       user.User
+	Campaign   campaign.Campaign
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }

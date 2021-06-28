@@ -13,30 +13,37 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 func main() {
 
-	dsn := "root:!@tcp(127.0.0.1:3306)/BWA?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:rjanDoni10!@tcp(127.0.0.1:3306)/BWA?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
+	db1, err := sqlx.Connect("mysql", "root:rjanDoni10!@(localhost:3306)/BWA")
 	if err != nil {
 		log.Fatal(err.Error())
+
 	}
 
-	userRepository := user.NewRepository(db)
+	repoSQL := user.NewRepositorySQL(db1)
+
+	//userRepository := user.NewRepository(db)
 	campaignRepository := campaign.NewRepository(db)
 	TransactionRepo := transactions.NewRepository(db)
 
-	userService := user.NewService(userRepository)
+	userService := user.NewService(repoSQL)
 	authService := auth.NewService()
 	campaignService := campaign.NewService(campaignRepository)
-	_ = transactions.NewService(TransactionRepo)
+	transactionService := transactions.NewService(TransactionRepo)
 
 	userHandler := handler.NewUserHandler(userService, authService)
 	campaignHandler := handler.NewCampaignHandler(campaignService)
+	transactionsHandler := handler.NewTransaction(transactionService)
 
 	router := gin.Default()
 	router.Static("/images", "./images")
@@ -52,6 +59,9 @@ func main() {
 	api.POST("/campaign", authMiddleWare(authService, userService), campaignHandler.CreateCampaign)
 	api.PUT("/campaign/:id", authMiddleWare(authService, userService), campaignHandler.UpdateCampaign)
 	api.POST("/campaign-images", authMiddleWare(authService, userService), campaignHandler.UploadImage)
+
+	api.GET("/campaign/:id/transactions", authMiddleWare(authService, userService), transactionsHandler.GetTransactions)
+
 	router.Run()
 
 }
@@ -66,7 +76,7 @@ func authMiddleWare(authService auth.Service, userService user.Service) gin.Hand
 			return
 		}
 
-		tokenString := ""
+		var tokenString string
 		arrayToken := strings.Split(authHeader, " ")
 		if len(arrayToken) == 2 {
 			tokenString = arrayToken[1]

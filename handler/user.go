@@ -10,16 +10,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type userHandler struct {
+type UserHandler struct {
 	userService user.Service
 	authService auth.Service
 }
 
-func NewUserHandler(userService user.Service, authService auth.Service) *userHandler {
-	return &userHandler{userService, authService}
+func NewUserHandler(userService user.Service, authService auth.Service) *UserHandler {
+	return &UserHandler{userService, authService}
 }
 
-func (h *userHandler) RegisterUser(c *gin.Context) {
+func (h *UserHandler) RegisterUser(c *gin.Context) {
 	//tangkap input dari usser
 	//map dari user input ke registeruserinput
 
@@ -40,7 +40,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	if err != nil {
 
 		// error disini waktu mau insert ke db
-		response := helper.APIResponse("registe account failed", http.StatusBadRequest, "failed", nil)
+		response := helper.APIResponse("register account failed", http.StatusBadRequest, "failed", nil)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
@@ -60,7 +60,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *userHandler) Login(c *gin.Context) {
+func (h *UserHandler) Login(c *gin.Context) {
 	var input user.LoginInput
 
 	err := c.ShouldBindJSON(&input)
@@ -98,7 +98,7 @@ func (h *userHandler) Login(c *gin.Context) {
 
 }
 
-func (h *userHandler) CheckEmailAvailability(c *gin.Context) {
+func (h *UserHandler) CheckEmailAvailability(c *gin.Context) {
 	//input emAIL DARI USER
 	//input di mapping ke struct input
 	// struct input dipassing ke service
@@ -142,7 +142,7 @@ func (h *userHandler) CheckEmailAvailability(c *gin.Context) {
 
 }
 
-func (h *userHandler) UploadAvatar(c *gin.Context) {
+func (h *UserHandler) UploadAvatar(c *gin.Context) {
 	file, err := c.FormFile("avatar")
 	if err != nil {
 		data := gin.H{"is_uploaded": false}
