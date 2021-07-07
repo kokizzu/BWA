@@ -21,10 +21,10 @@ import (
 
 func main() {
 
-	dsn := "root:rjanDoni10!@tcp(127.0.0.1:3306)/BWA?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:!@tcp(127.0.0.1:3306)/BWA?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
-	db1, err := sqlx.Connect("mysql", "root:rjanDoni10!@(localhost:3306)/BWA")
+	db1, err := sqlx.Connect("mysql", "root:!@(localhost:3306)/BWA")
 	if err != nil {
 		log.Fatal(err.Error())
 
