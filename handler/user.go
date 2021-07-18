@@ -88,6 +88,10 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 	c.JSON(response.Meta.Code, response)
 }
 
+// TODO: continue by refactor Login(gin.Context) to login(user.LoginInput)
+// TODO: continue by creating LoginGrpc() and call login(user.LoginInput)
+// TODO: do the same with CheckEmail()
+
 func (h *UserHandler) Login(c *gin.Context) {
 	var input user.LoginInput
 

@@ -36,6 +36,7 @@ message LoginInput {
 
 message LoginOutput {
   Meta Meta = 1;
+  // TODO: continue by creating a struct LoginData 
 }
 
 message CheckEmailInput {
@@ -44,6 +45,7 @@ message CheckEmailInput {
 
 message CheckEmailOutput {
   Meta Meta = 1;
+  // TODO: continue by creating a struct CheckEmailData 
 }
 
 service UserService {
