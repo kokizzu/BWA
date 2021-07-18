@@ -31,6 +31,10 @@ func (h *UserHandler) RegisterUserGrpc(ctx context.Context, in *rpcp.RegisterUse
 	input := &user.RegisterUserInput{}
 	response, formatter := h.registerUser(input.FromProto(in))
 	
+	out = &rpcp.RegisterUserOutput{
+		Meta: &rpcp.Meta{},
+		Data: &rpcp.RegisterUserData{},
+	}
 	response.ToMetaProto(out.Meta)
 	if formatter == nil {
 		err = errors.New(response.Meta.Message)

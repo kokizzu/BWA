@@ -9,17 +9,19 @@ import (
 	"BWA/transactions"
 	"BWA/user"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -27,16 +29,37 @@ import (
 
 func main() {
 
-	godotenv.Load(`.env`)
+	// environment
+	err := godotenv.Load(`.env`)
+	if err != nil {
+		log.Print(`failed load .env`)
+	}
+	
+	// database
 	dsn := os.Getenv(`MYSQL_DSN`)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	db1, err := sqlx.Connect("mysql", dsn)
 	if err != nil {
-		log.Fatal(err.Error())
+		panic(err)
 
 	}
 
+	// logger
+	
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	if gin.IsDebugging() {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+
+	log.Logger = log.Output(
+		zerolog.ConsoleWriter{
+			Out:     os.Stderr,
+			NoColor: false,
+		},
+	)
+	
+	// dependencies
 	repoSQL := user.NewRepositorySQL(db1)
 
 	//userRepository := user.NewRepository(db)
@@ -52,19 +75,24 @@ func main() {
 	campaignHandler := handler.NewCampaignHandler(campaignService)
 	transactionsHandler := handler.NewTransaction(transactionService)
 
+	// grpc
 	go func() {
 		const port = `:9090`
 		lis, err := net.Listen("tcp", fmt.Sprintf("localhost"+port))
 		if err != nil {
-			log.Fatal(`failed to listen on port ` + port)
+			panic(`failed to listen on port ` + port)
 		}
 		grpcServer := grpc.NewServer()
 		rpcp.RegisterUserServiceServer(grpcServer, userHandler)
-		log.Fatal(grpcServer.Serve(lis))
+		err = grpcServer.Serve(lis)
+		if err != nil {
+			panic(err)
+		}
 	}()
 
 	router := gin.Default()
 	router.Static("/images", "./images")
+	router.Use(logger.SetLogger())
 	api := router.Group("/api/v1")
 
 	api.POST("/users", userHandler.RegisterUser)

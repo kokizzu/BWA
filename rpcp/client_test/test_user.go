@@ -11,6 +11,7 @@ import (
 
 func main() {
 	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithInsecure())
 	conn, err := grpc.Dial(`localhost:9090`, opts...)
 	if err != nil {
 		log.Fatal(err)
