@@ -24,27 +24,30 @@ func NewRepositorySQL(DB *sqlx.DB) *repoSql {
 func (r *repoSql) Save(user User) (User, error) {
 	querry := `
 	INSERT INTO 
-		user(
+		users
+		(
 			name,
 			email,
-			hashpassword,
-			avatar_file_name,
+			occupation,
+			password_hash,
+			role,
 			created_at,
 			updated_at
 		) 
-		VALUES(
+		VALUES
+		(
 			$1,
 			$2,
 			$3,
 			$4,
 			$5,
-			$6
-	
+			$6,
+			$7
 		)
 	
 	`
 
-	_, err := r.DB.Exec(querry, user.Name, user.Email, user.PasswordHash, "", time.Now(), time.Now())
+	_, err := r.DB.Exec(querry, user.Name, user.Email, user.Occupation, user.PasswordHash, user.Role, time.Now(), time.Now())
 
 	if err != nil {
 		return User{}, err
@@ -54,9 +57,12 @@ func (r *repoSql) Save(user User) (User, error) {
 
 	return User{
 		ID:             int(userdb.ID.Int64),
+		Name:           userdb.Name.String,
+		Occupation:     userdb.Occupation.String,
 		Email:          userdb.Email.String,
 		PasswordHash:   userdb.PasswordHash.String,
 		AvatarFileName: userdb.AvatarFileName.String,
+		Role:           userdb.Role.String,
 	}, nil
 }
 

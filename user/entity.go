@@ -23,9 +23,8 @@ type UserDB struct {
 	Occupation     sql.NullString `db:"occupation"`
 	Email          sql.NullString `db:"email"`
 	PasswordHash   sql.NullString `db:"password_hash"`
-	AvatarFileName sql.NullString `db:"avatarfilename"`
+	AvatarFileName sql.NullString `db:"avatar_file_ename"`
 	Role           sql.NullString `db:"role"`
-	CreatedAt      time.Time	`db:"created_at"`
-	UpdatedAt      time.Time	`db:"updated_at"`
+	CreatedAt      time.Time      `db:"created_at"`
+	UpdatedAt      time.Time      `db:"updated_at"`
 }
-

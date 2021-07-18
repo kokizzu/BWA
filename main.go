@@ -14,29 +14,30 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 func main() {
 
-	dsn := "root:!@tcp(127.0.0.1:3306)/BWA?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "@tcp(127.0.0.1:3306)/BWA?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-
-	db1, err := sqlx.Connect("mysql", "root:!@(localhost:3306)/BWA")
 	if err != nil {
 		log.Fatal(err.Error())
-
 	}
+	// db1, err := sqlx.Connect("mysql", "root:@(localhost:3306)/BWA")
+	// if err != nil {
+	// 	log.Fatal(err.Error())
 
-	repoSQL := user.NewRepositorySQL(db1)
+	// }
 
-	//userRepository := user.NewRepository(db)
+	// repoSQL := user.NewRepositorySQL(db1)
+
+	userRepository := user.NewRepository(db)
 	campaignRepository := campaign.NewRepository(db)
 	TransactionRepo := transactions.NewRepository(db)
 
-	userService := user.NewService(repoSQL)
+	userService := user.NewService(userRepository)
 	authService := auth.NewService()
 	campaignService := campaign.NewService(campaignRepository)
 	transactionService := transactions.NewService(TransactionRepo)

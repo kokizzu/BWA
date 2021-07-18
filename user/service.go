@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,10 +16,10 @@ type Service interface {
 }
 
 type service struct {
-	repository RepoSQL
+	repository Repository
 }
 
-func NewService(repository RepoSQL) *service {
+func NewService(repository Repository) *service {
 	return &service{repository}
 }
 
@@ -28,7 +29,6 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 	user.Name = input.Name
 	user.Email = input.Email
 	user.Occupation = input.Occupation
-
 	//ini bahaya jangan sama variable nya
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
 	if err != nil {
@@ -40,6 +40,8 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 
 	newUser, err := s.repository.Save(user)
 	if err != nil {
+		fmt.Println("error disini")
+
 		return newUser, err
 	}
 	return newUser, nil
