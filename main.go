@@ -5,26 +5,33 @@ import (
 	"BWA/campaign"
 	"BWA/handler"
 	"BWA/helper"
+	"BWA/rpcp"
 	"BWA/transactions"
 	"BWA/user"
+	"fmt"
 	"log"
+	"net"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
+	"google.golang.org/grpc"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 func main() {
 
-	dsn := "root:!@tcp(127.0.0.1:3306)/BWA?charset=utf8mb4&parseTime=True&loc=Local"
+	godotenv.Load(`.env`)
+	dsn := os.Getenv(`MYSQL_DSN`)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
-	db1, err := sqlx.Connect("mysql", "root:!@(localhost:3306)/BWA")
+	db1, err := sqlx.Connect("mysql", dsn)
 	if err != nil {
 		log.Fatal(err.Error())
 
@@ -44,6 +51,17 @@ func main() {
 	userHandler := handler.NewUserHandler(userService, authService)
 	campaignHandler := handler.NewCampaignHandler(campaignService)
 	transactionsHandler := handler.NewTransaction(transactionService)
+
+	go func() {
+		const port = `:9090`
+		lis, err := net.Listen("tcp", fmt.Sprintf("localhost"+port))
+		if err != nil {
+			log.Fatal(`failed to listen on port ` + port)
+		}
+		grpcServer := grpc.NewServer()
+		rpcp.RegisterUserServiceServer(grpcServer, userHandler)
+		log.Fatal(grpcServer.Serve(lis))
+	}()
 
 	router := gin.Default()
 	router.Static("/images", "./images")

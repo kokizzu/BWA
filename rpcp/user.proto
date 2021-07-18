@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+option go_package = "BWA/rpcp";
+
+message RegisterUserInput {
+  string Name = 1;
+  string Occupation = 2;
+  string Email = 3;
+  string Password = 4;
+}
+
+message Meta {
+  string Message = 1;
+  int32 Code = 2;
+  string Status = 3;
+}
+
+message RegisterUserData {
+  int32 ID = 1;
+  string Name = 2;
+  string Occupation = 3;
+  string Email = 4;
+  string Token = 5;
+  string ImageURL = 6;
+}
+
+message RegisterUserOutput {
+  Meta Meta = 1;
+  RegisterUserData Data = 2;
+}
+
+message LoginInput {
+  string Email = 1;
+  string Password = 2;
+}
+
+message LoginOutput {
+  Meta Meta = 1;
+}
+
+message CheckEmailInput {
+  string Email = 1;
+}
+
+message CheckEmailOutput {
+  Meta Meta = 1;
+}
+
+service UserService {
+  rpc RegisterUserGrpc(RegisterUserInput) returns (RegisterUserOutput);
+  rpc LoginGrpc(LoginInput) returns (LoginOutput);
+  rpc CheckEmailGrpc(CheckEmailInput) returns (CheckEmailOutput);
+}

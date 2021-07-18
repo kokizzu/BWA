@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	RegisterUser(input RegisterUserInput) (User, error)
+	RegisterUser(input *RegisterUserInput) (User, error)
 	Login(input LoginInput) (User, error)
 	IsEmailAvailable(input CheckEmailInput) (bool, error)
 	SaveAvatar(ID int, fileLocation string) (User, error)
@@ -22,7 +22,7 @@ func NewService(repository RepoSQL) *service {
 	return &service{repository}
 }
 
-func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
+func (s *service) RegisterUser(input *RegisterUserInput) (User, error) {
 
 	user := User{}
 	user.Name = input.Name

@@ -3,7 +3,10 @@ package handler
 import (
 	"BWA/auth"
 	"BWA/helper"
+	"BWA/rpcp"
 	"BWA/user"
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -12,11 +15,52 @@ import (
 
 type UserHandler struct {
 	userService user.Service
-	authService auth.Service
+	authService auth.Service	
+	rpcp.UnimplementedUserServiceServer
 }
 
 func NewUserHandler(userService user.Service, authService auth.Service) *UserHandler {
-	return &UserHandler{userService, authService}
+	return &UserHandler{
+		userService: userService, 
+		authService: authService,
+	}
+}
+
+func (h *UserHandler) RegisterUserGrpc(ctx context.Context, in *rpcp.RegisterUserInput) (out *rpcp.RegisterUserOutput, err error) {
+	
+	input := &user.RegisterUserInput{}
+	response, formatter := h.registerUser(input.FromProto(in))
+	
+	response.ToMetaProto(out.Meta)
+	if formatter == nil {
+		err = errors.New(response.Meta.Message)
+		return
+	}
+	formatter.ToDataProto(out.Data)
+	return
+}
+
+func (h *UserHandler) registerUser(input *user.RegisterUserInput) (helper.Response, *user.UserFormater) {
+	
+	newUser, err := h.userService.RegisterUser(input)
+
+	if err != nil {
+		// error disini waktu mau insert ke db
+		response := helper.APIResponse("register account failed", http.StatusBadRequest, "failed", nil)
+		return response, nil
+	}
+
+	authToken, err := h.authService.GenerateToken(newUser.ID)
+	if err != nil {
+		response := helper.APIResponse("register account failed", http.StatusBadRequest, "failed", nil)
+		return response, nil
+
+	}
+
+	formatter := user.FormatUser(newUser, authToken)
+
+	response := helper.APIResponse("account has been created", http.StatusOK, "success", formatter)
+	return response, &formatter
 }
 
 func (h *UserHandler) RegisterUser(c *gin.Context) {
@@ -35,29 +79,9 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 		return
 	}
 
-	newUser, err := h.userService.RegisterUser(input)
+	response, _ := h.registerUser(&input)
 
-	if err != nil {
-
-		// error disini waktu mau insert ke db
-		response := helper.APIResponse("register account failed", http.StatusBadRequest, "failed", nil)
-		c.JSON(http.StatusBadRequest, response)
-		return
-	}
-
-	authToken, err := h.authService.GenerateToken(newUser.ID)
-	if err != nil {
-		response := helper.APIResponse("registe account failed", http.StatusBadRequest, "failed", nil)
-		c.JSON(http.StatusBadRequest, response)
-		return
-
-	}
-
-	formatter := user.FormatUser(newUser, authToken)
-
-	response := helper.APIResponse("account has been created", http.StatusOK, "success", formatter)
-
-	c.JSON(http.StatusOK, response)
+	c.JSON(response.Meta.Code, response)
 }
 
 func (h *UserHandler) Login(c *gin.Context) {

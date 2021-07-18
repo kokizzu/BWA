@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  db2:
+    image: mysql:latest
+    volumes:
+      - db_data2:/var/lib/mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=test123
+      - MYSQL_DATABASE=BWA
+      - MYSQL_USER=bwa
+      - MYSQL_PASSWORD=test123
+    ports:
+       - "3306:3306"
+      
+volumes:
+  db_data2:

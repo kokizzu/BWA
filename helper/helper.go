@@ -1,10 +1,20 @@
 package helper
 
-import "github.com/go-playground/validator/v10"
+import (
+	"BWA/rpcp"
+
+	"github.com/go-playground/validator/v10"
+)
 
 type Response struct {
 	Meta Meta        `json:"meta"`
 	Data interface{} `json:"data"`
+}
+
+func (r Response) ToMetaProto(meta *rpcp.Meta) {
+	meta.Message = r.Meta.Message
+	meta.Code = int32(r.Meta.Code)
+	meta.Status = r.Meta.Status
 }
 
 type Meta struct {
